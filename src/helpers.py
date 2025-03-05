@@ -22,6 +22,11 @@ llm = ChatGoogleGenerativeAI(
     model="gemini-2.0-flash"
 )
 
+
+#==================================================================================
+# Processes a PDF, extracts text, generates embeddings, and stores them in Weaviate.
+#==================================================================================
+
 def setup_vector_database(pdf_path):
     """Processes a PDF, extracts text, generates embeddings, and stores them in Weaviate."""
     loader = PyPDFLoader(pdf_path)
@@ -44,8 +49,14 @@ def setup_vector_database(pdf_path):
     vector_db = WeaviateVectorStore.from_documents(docs, embeddings, client=client)
     return vector_db
 
+#===================================================================================
+# Builds a pipeline that leverages a Weaviate vector store to retrieve context and a language model to generate answers.
+#==================================================================================
+
 def create_rag_chain(vector_db):
     """Creates a RAG (Retrieval-Augmented Generation) chain using Weaviate as the retriever."""
+
+    
     template = """You are an assistant for question-answering tasks. 
     Use the following pieces of retrieved context to answer the question. 
     If you don't know the answer, just say that you don't know. 
