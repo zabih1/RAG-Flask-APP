@@ -72,8 +72,8 @@ def create_rag_chain(vector_db):
     return rag_chain
 
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = 'uploads'
-os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+app.config['DATA'] = 'DATA'
+os.makedirs(app.config['DATA'], exist_ok=True)
 
 @app.route('/')
 def index():
@@ -92,7 +92,7 @@ def upload_pdf():
         return "No selected file", 400
     
     filename = werkzeug.utils.secure_filename(file.filename)
-    filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    filepath = os.path.join(app.config['DATA'], filename)
     file.save(filepath)
     
     current_vector_db = setup_vector_database(filepath)
