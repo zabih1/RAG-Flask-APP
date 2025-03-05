@@ -1,0 +1,7 @@
+Flask
+python-dotenv
+werkzeug
+langchain
+weaviate-client
+langchain-google-genai
+langchain-weaviate
