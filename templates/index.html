@@ -20,6 +20,10 @@
             background: #888;
             border-radius: 3px;
         }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body class="bg-gray-50 min-h-screen flex items-center justify-center p-4">
@@ -52,9 +56,16 @@
                         </div>
                         <button 
                             type="submit" 
-                            class="w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 transition font-semibold shadow-md shadow-blue-200"
+                            id="upload-button"
+                            class="w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 transition font-semibold shadow-md shadow-blue-200 relative"
                         >
-                            Upload Document
+                            <span id="upload-button-text">Upload Document</span>
+                            <div id="upload-spinner" class="hidden absolute inset-0 flex items-center justify-center">
+                                <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                            </div>
                         </button>
                     </form>
                     <div id="upload-status" class="mt-4 text-sm h-6"></div>
@@ -110,6 +121,11 @@
             e.preventDefault();
             var formData = new FormData(this);
 
+            // Show loading spinner
+            $('#upload-button-text').addClass('invisible');
+            $('#upload-spinner').removeClass('hidden');
+            $('#upload-status').html('<p class="text-blue-600">Processing document...</p>');
+
             $.ajax({
                 type: "POST",
                 url: "/upload_pdf",
@@ -117,6 +133,10 @@
                 processData: false,
                 contentType: false,
                 success: function(response) {
+                    // Hide loading spinner
+                    $('#upload-button-text').removeClass('invisible');
+                    $('#upload-spinner').addClass('hidden');
+
                     $('#upload-status').html('<p class="text-green-600">PDF uploaded successfully!</p>');
                     $('#chat-container').append(`
                         <div class="bg-blue-50 p-4 rounded-lg mb-4 text-gray-700 border border-blue-100">
@@ -126,6 +146,10 @@
                     scrollToBottom();
                 },
                 error: function(error) {
+                    // Hide loading spinner
+                    $('#upload-button-text').removeClass('invisible');
+                    $('#upload-spinner').addClass('hidden');
+
                     $('#upload-status').html(`<p class="text-red-600">Error: ${error.responseText}</p>`);
                 }
             });
