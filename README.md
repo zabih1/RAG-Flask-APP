@@ -5,7 +5,7 @@ A Flask-based application implementing Retrieval-Augmented Generation (RAG).
 ## Directory Structure
 
 ```
-└── rag-flask-app/
+rag-flask-app/
     ├── app.py                # Main Flask application
     ├── requirements.txt      # List of dependencies
     ├── DATA/                 # Directory for storing dataset files
