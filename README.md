@@ -1,8 +1,11 @@
 
-
 A Flask-based application implementing Retrieval-Augmented Generation (RAG).
 
+📽️ [Watch the demo video on Google Drive](https://drive.google.com/file/d/12H4q2zMOBHOW78w3DiHGWEfmFMoenVbU/view?usp=sharing)
 
+
+
+![Project demo](demo.gif)
 
 ## Directory Structure
 
