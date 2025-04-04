@@ -5,3 +5,6 @@ langchain
 weaviate-client
 langchain-google-genai
 langchain-weaviate
+langchain_community
+langchain_text_splitters
+langchain_weaviate

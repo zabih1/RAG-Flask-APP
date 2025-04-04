@@ -15,7 +15,9 @@ load_dotenv()
 
 api_key = os.getenv("GEMINI_API_KEY")
 weaviate_api_key = os.getenv("WEAVIATE_API_KEY")
+print(weaviate_api_key)
 weaviate_url = os.getenv("WEAVIATE_URL")
+print(weaviate_url)
 
 llm = ChatGoogleGenerativeAI(
     api_key=api_key,
@@ -47,6 +49,7 @@ def setup_vector_database(pdf_path):
     )
 
     vector_db = WeaviateVectorStore.from_documents(docs, embeddings, client=client)
+    print("vector db is setup")
     return vector_db
 
 #===================================================================================
