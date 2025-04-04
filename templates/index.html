@@ -3,259 +3,300 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RAG Document AI Assistant</title>
+    <title>Document AI Assistant</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Add Markdown parser -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
-        :root {
-            --primary: #4338CA;
-            --primary-hover: #3730A3;
-            --primary-light: #EEF2FF;
-            --secondary: #F3F4F6;
-        }
-        
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #F9FAFB;
+            font-family: 'Outfit', sans-serif;
+            background-color: #f5f7fa;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        .scrollbar-thin::-webkit-scrollbar {
+            width: 5px;
+        }
+        .scrollbar-thin::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 4px;
+        }
+        .scrollbar-thin::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        @keyframes pulse-dot {
+            0% { transform: scale(0.8); opacity: 0.6; }
+            50% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(0.8); opacity: 0.6; }
+        }
+        .dot-pulse {
+            animation: pulse-dot 1.5s infinite;
+        }
+        .dot-pulse-delay-1 {
+            animation: pulse-dot 1.5s infinite 0.2s;
+        }
+        .dot-pulse-delay-2 {
+            animation: pulse-dot 1.5s infinite 0.4s;
+        }
+        .chat-bubble-user {
+            border-radius: 18px 18px 4px 18px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        }
+        .chat-bubble-ai {
+            border-radius: 18px 18px 18px 4px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+        .card-shadow {
+            box-shadow: 0 15px 30px -5px rgba(99, 102, 241, 0.1), 0 8px 15px -6px rgba(99, 102, 241, 0.05);
+        }
+        .upload-shadow {
+            box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.1), 0 2px 4px -1px rgba(99, 102, 241, 0.05);
+        }
+        .file-upload-area {
+            transition: all 0.3s ease;
+        }
+        .file-upload-area:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.1), 0 4px 6px -2px rgba(99, 102, 241, 0.05);
+        }
+        .send-button {
+            transition: all 0.2s ease;
+        }
+        .send-button:hover {
+            transform: translateY(-1px);
+        }
+        .send-button:active {
+            transform: translateY(1px);
         }
         
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 4px;
-        }
-        
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #CBD5E1;
-            border-radius: 10px;
-        }
-        
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: #94A3B8; 
-        }
-        
-        @keyframes pulse-ring {
-            0% {
-                transform: scale(0.8);
-                opacity: 0.8;
+        /* Fix for zoom issues */
+        @media screen and (min-width: 768px) {
+            .chat-container-wrapper {
+                min-height: 400px;
+                height: calc(100vh - 250px);
+                max-height: 550px;
             }
-            70% {
-                transform: scale(1);
-                opacity: 0;
+            
+            .chat-section {
+                min-height: 500px;
             }
-            100% {
-                transform: scale(0.8);
-                opacity: 0;
-            }
-        }
-        
-        .animate-pulse-ring:before {
-            content: '';
-            position: absolute;
-            left: -5px;
-            top: -5px;
-            right: -5px;
-            bottom: -5px;
-            border-radius: 50%;
-            background-color: #4338CA;
-            animation: pulse-ring 1.5s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
-            z-index: -1;
-        }
-        
-        .typing-indicator span {
-            display: inline-block;
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background-color: #6366F1;
-            margin: 0 1px;
-            animation: bounce 1.4s infinite ease-in-out both;
-        }
-        
-        .typing-indicator span:nth-child(1) {
-            animation-delay: -0.32s;
-        }
-        
-        .typing-indicator span:nth-child(2) {
-            animation-delay: -0.16s;
-        }
-        
-        @keyframes bounce {
-            0%, 80%, 100% { transform: translateY(0); }
-            40% { transform: translateY(-6px); }
-        }
-        
-        .message-appear {
-            animation: appear 0.3s ease-out forwards;
-            opacity: 0;
-            transform: translateY(10px);
-        }
-        
-        @keyframes appear {
-            to {
-                opacity: 1;
-                transform: translateY(0);
+            
+            .input-container {
+                position: relative;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                padding: 16px;
+                background: rgba(255, 255, 255, 0.9);
+                backdrop-filter: blur(8px);
+                border-top: 1px solid rgba(209, 213, 219, 0.5);
             }
         }
         
-        .markdown pre {
-            background-color: #F1F5F9;
-            padding: 0.75rem;
-            border-radius: 0.375rem;
-            overflow-x: auto;
-            margin: 0.75rem 0;
-            font-size: 0.875rem;
-            line-height: 1.5;
+        /* Responsive improvements */
+        @media screen and (max-width: 767px) {
+            .container-wrapper {
+                height: 100vh;
+                padding: 0;
+                margin: 0;
+            }
+            
+            .main-container {
+                width: 100%;
+                height: 100%;
+                border-radius: 0;
+                max-width: none;
+            }
+            
+            .upload-section {
+                width: 100%;
+                padding-bottom: 20px;
+            }
+            
+            .chat-section {
+                width: 100%;
+                height: 100%;
+            }
         }
         
-        .markdown code {
-            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-            background-color: #F1F5F9;
-            padding: 0.125rem 0.25rem;
-            border-radius: 0.25rem;
-            font-size: 0.875rem;
+        /* Markdown styling */
+        .markdown-content h1 { 
+            font-size: 1.5rem; 
+            font-weight: 700; 
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: #1e293b;
         }
-        
-        .markdown ul, .markdown ol {
-            padding-left: 1.5rem;
-            margin: 0.5rem 0;
+        .markdown-content h2 { 
+            font-size: 1.25rem; 
+            font-weight: 600; 
+            margin-top: 1.25rem;
+            margin-bottom: 0.5rem;
+            color: #334155;
         }
-        
-        .markdown ul {
+        .markdown-content h3 { 
+            font-size: 1.125rem; 
+            font-weight: 600; 
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+            color: #475569;
+        }
+        .markdown-content p {
+            margin-bottom: 0.75rem;
+        }
+        .markdown-content ul, .markdown-content ol {
+            margin-left: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+        .markdown-content ul {
             list-style-type: disc;
         }
-        
-        .markdown ol {
+        .markdown-content ol {
             list-style-type: decimal;
         }
-        
-        .markdown a {
-            color: #4338CA;
+        .markdown-content a {
+            color: #6366f1;
             text-decoration: underline;
         }
-        
-        .markdown blockquote {
-            border-left: 3px solid #E2E8F0;
+        .markdown-content blockquote {
+            border-left: 4px solid #e2e8f0;
             padding-left: 1rem;
-            color: #64748B;
-            margin: 0.75rem 0;
+            margin-left: 0;
+            margin-right: 0;
+            font-style: italic;
+            color: #64748b;
+        }
+        .markdown-content code {
+            background-color: #f1f5f9;
+            padding: 0.2rem 0.4rem;
+            border-radius: 0.25rem;
+            font-family: ui-monospace, monospace;
+            font-size: 0.875rem;
+            color: #334155;
+        }
+        .markdown-content pre {
+            background-color: #f1f5f9;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            margin-bottom: 1rem;
+        }
+        .markdown-content pre code {
+            background-color: transparent;
+            padding: 0;
+            border-radius: 0;
+            color: #334155;
+        }
+        .markdown-content strong, .markdown-content b {
+            font-weight: 600;
+            color: #334155;
+        }
+        .markdown-content em, .markdown-content i {
+            font-style: italic;
+        }
+        .markdown-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1rem;
+        }
+        .markdown-content th, .markdown-content td {
+            border: 1px solid #e2e8f0;
+            padding: 0.5rem;
+        }
+        .markdown-content th {
+            background-color: #f8fafc;
+            font-weight: 600;
         }
         
-        .tooltip {
-            position: relative;
+        /* Animated background - modern colors */
+        .animated-bg {
+            background: linear-gradient(-45deg, #6366f1, #8b5cf6, #ec4899, #14b8a6);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
         }
         
-        .tooltip:after {
-            content: attr(data-tooltip);
-            position: absolute;
-            bottom: 120%;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: #1F2937;
-            color: white;
-            text-align: center;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            white-space: nowrap;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.2s ease;
-            z-index: 100;
-        }
-        
-        .tooltip:before {
-            content: '';
-            position: absolute;
-            bottom: 120%;
-            left: 50%;
-            transform: translate(-50%, 100%);
-            border-width: 4px;
-            border-style: solid;
-            border-color: #1F2937 transparent transparent transparent;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.2s ease;
-            z-index: 100;
-        }
-        
-        .tooltip:hover:after, .tooltip:hover:before {
-            opacity: 1;
-            visibility: visible;
-        }
-        
-        .btn-primary {
-            background-color: var(--primary);
-            color: white;
-            transition: all 0.2s ease;
-        }
-        
-        .btn-primary:hover {
-            background-color: var(--primary-hover);
-        }
-        
-        .btn-primary:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        
-        /* Mobile Adjustments */
-        @media (max-width: 768px) {
-            .mobile-hidden {
-                display: none;
+        @keyframes gradient {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
             }
         }
     </style>
 </head>
-<body class="min-h-screen flex items-center justify-center p-2 md:p-4 bg-gradient-to-br from-indigo-50 to-gray-50">
-    <div class="w-full max-w-4xl bg-white shadow-lg rounded-xl overflow-hidden border border-gray-200 transition-all duration-300">
-        <div class="flex flex-col md:flex-row h-[580px]">
-            <!-- Sidebar Section -->
-            <div class="md:w-1/3 bg-indigo-50 p-3 border-r border-gray-200 flex flex-col">
-                <div class="mb-3 flex items-center">
-                    <div class="rounded-full bg-indigo-600 p-2 mr-2 relative animate-pulse-ring">
-                        <i class="fas fa-robot text-white text-sm"></i>
+<body class="animated-bg flex items-center justify-center p-4 container-wrapper">
+    <div class="w-full max-w-6xl glass-effect rounded-xl overflow-hidden card-shadow main-container">
+        <div class="md:flex">
+            <!-- Document Upload Section -->
+            <div class="md:w-1/3 bg-indigo-50/60 backdrop-blur-sm p-6 md:p-7 border-r border-indigo-100/40 upload-section">
+                <div class="text-center">
+                    <div class="mb-6">
+                        <div class="inline-block mb-3 bg-white/80 p-3 rounded-full shadow-md">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-indigo-600" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <h2 class="text-xl font-bold text-gray-800 mb-1">Document AI Assistant</h2>
+                        <p class="text-sm text-gray-500">Upload and chat with your documents</p>
                     </div>
-                    <h1 class="text-lg font-bold text-gray-800">Document AI</h1>
-                    <span class="ml-auto px-2 py-1 bg-green-100 text-green-800 text-xs rounded-md">LIVE</span>
-                </div>
-                
-                <div class="bg-white rounded-lg shadow-sm p-3 border border-gray-100 mb-3">
-                    <h2 class="text-sm font-semibold text-gray-800 mb-2 flex items-center">
-                        <i class="fas fa-file-pdf text-indigo-600 mr-2"></i>
-                        Upload Document
-                    </h2>
-                    <form id="pdf-upload-form" class="space-y-2">
-                        <div class="border-2 border-dashed border-indigo-200 p-3 rounded-lg transition-all duration-200 hover:border-indigo-500 group bg-indigo-50 bg-opacity-30 cursor-pointer">
+                    
+                    <form id="pdf-upload-form" class="space-y-5">
+                        <div class="file-upload-area border-2 border-dashed border-indigo-200 bg-white/70 p-7 rounded-xl transition hover:border-indigo-400 group upload-shadow">
                             <input 
                                 type="file" 
                                 id="pdf-file" 
                                 name="pdf-file" 
                                 accept=".pdf" 
                                 class="hidden"
-                                aria-label="Upload PDF document"
                             />
                             <label 
                                 for="pdf-file" 
-                                class="cursor-pointer block text-center"
+                                class="cursor-pointer block"
                             >
-                                <i class="fas fa-cloud-upload-alt text-indigo-400 group-hover:text-indigo-600 text-2xl mb-1"></i>
-                                <p class="text-xs text-gray-600 group-hover:text-indigo-600 font-medium">
-                                    Click or drop PDF here
+                                <div class="bg-indigo-50 p-4 rounded-full w-16 h-16 mx-auto mb-3 flex items-center justify-center group-hover:bg-indigo-100 transition">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-indigo-500 group-hover:text-indigo-600 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                </div>
+                                <p class="text-gray-700 font-medium group-hover:text-indigo-600 transition">
+                                    Upload PDF
+                                </p>
+                                <p class="text-gray-400 text-xs mt-1 group-hover:text-indigo-400 transition">
+                                    Click to browse files
                                 </p>
                             </label>
-                            <p id="file-name" class="text-xs text-center mt-1 text-indigo-600 font-medium truncate"></p>
+                            <p id="file-name" class="text-xs text-gray-500 mt-3 truncate h-5 font-medium"></p>
                         </div>
                         <button 
                             type="submit" 
                             id="upload-button"
-                            class="w-full py-2 rounded-lg font-medium text-sm relative flex items-center justify-center btn-primary"
-                            disabled
+                            class="w-full bg-gradient-to-r from-indigo-500 to-violet-500 text-white py-3 px-6 rounded-xl hover:from-indigo-600 hover:to-violet-600 transition font-semibold shadow-lg shadow-indigo-200/60 relative flex items-center justify-center"
                         >
-                            <span id="upload-button-text">Process Document</span>
+                            <span id="upload-button-text" class="flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                </svg>
+                                Upload Document
+                            </span>
                             <div id="upload-spinner" class="hidden absolute inset-0 flex items-center justify-center">
                                 <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -264,184 +305,109 @@
                             </div>
                         </button>
                     </form>
-                    <div id="upload-status" class="mt-2 text-xs min-h-5"></div>
-                </div>
-                
-                <div class="flex-1 bg-white rounded-lg shadow-sm p-3 border border-gray-100 mb-3">
-                    <h2 class="text-sm font-semibold text-gray-800 mb-2 flex items-center">
-                        <i class="fas fa-info-circle text-indigo-600 mr-2"></i>
-                        How It Works
-                    </h2>
-                    <ol class="text-xs text-gray-600 space-y-1 pl-4 list-decimal">
-                        <li>Upload a PDF document</li>
-                        <li>Wait for processing to complete</li>
-                        <li>Ask questions about the document content</li>
-                        <li>Get AI-powered answers based on the document</li>
-                    </ol>
-                </div>
-                
-                <div class="bg-indigo-600 text-white rounded-lg p-3 text-xs">
-                    <div class="flex items-center mb-2">
-                        <i class="fas fa-lightbulb text-yellow-300 mr-2"></i>
-                        <span class="font-semibold">PRO TIP</span>
+                    <div id="upload-status" class="mt-4 text-sm min-h-6 font-medium"></div>
+
+                    <div class="mt-8 pt-4 border-t border-indigo-100/50">
+                        <div class="bg-white/50 rounded-lg p-4 shadow-sm">
+                            <p class="text-xs text-gray-600 leading-relaxed">
+                                Upload your PDF document and ask questions about its content. Get instant AI-powered responses based on the document information.
+                            </p>
+                        </div>
                     </div>
-                    <p>Ask specific questions about your document for the best results.</p>
                 </div>
             </div>
 
             <!-- Chat Section -->
-            <div class="md:w-2/3 flex flex-col h-full bg-gray-50">
-                <!-- Chat Header -->
-                <div class="border-b border-gray-200 py-2 px-4 bg-white flex items-center justify-between">
+            <div class="md:w-2/3 flex flex-col chat-section">
+                <!-- Header -->
+                <div class="px-6 py-4 border-b border-gray-100 bg-white/80 backdrop-blur-sm">
                     <div class="flex items-center">
-                        <div class="w-2 h-2 rounded-full bg-green-500 mr-2"></div>
-                        <h2 class="font-medium text-sm text-gray-700">Document Chat</h2>
-                    </div>
-                    <div class="flex space-x-1">
-                        <button id="refresh-chat" class="text-gray-400 hover:text-indigo-600 p-1 rounded tooltip" data-tooltip="Refresh">
-                            <i class="fas fa-sync-alt text-xs"></i>
-                        </button>
-                        <button id="clear-chat" class="text-gray-400 hover:text-indigo-600 p-1 rounded tooltip" data-tooltip="Clear chat">
-                            <i class="fas fa-trash-alt text-xs"></i>
-                        </button>
+                        <div class="bg-gradient-to-r from-indigo-100 to-violet-100 p-2 rounded-full mr-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-600" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-800">Document Chat</h3>
+                            <p class="text-xs text-gray-500">Ask questions about your PDF</p>
+                        </div>
                     </div>
                 </div>
                 
-                <!-- Chat Messages Container -->
+                <!-- Chat Messages Container - Responsive height -->
                 <div 
                     id="chat-container" 
-                    class="flex-grow p-4 overflow-y-auto custom-scrollbar space-y-3"
+                    class="flex-grow p-5 overflow-y-auto chat-container-wrapper scrollbar-thin bg-gradient-to-br from-slate-50/70 to-gray-50/70 backdrop-blur-sm"
                 >
-                    <div id="welcome-message" class="flex justify-center message-appear">
-                        <div class="bg-white text-gray-700 px-4 py-3 rounded-lg max-w-md text-center shadow-sm border border-indigo-100">
-                            <div class="bg-indigo-600 w-10 h-10 rounded-full flex items-center justify-center mx-auto mb-2">
-                                <i class="fas fa-robot text-white"></i>
+                    <div class="flex items-center justify-center h-full">
+                        <div class="text-center p-6 bg-white/80 rounded-xl shadow-sm border border-gray-100/60 max-w-md">
+                            <div class="bg-gradient-to-r from-indigo-50 to-violet-50 p-4 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                                </svg>
                             </div>
-                            <h3 class="font-medium text-sm mb-2">Welcome to Document AI!</h3>
-                            <p class="text-xs text-gray-600">Upload a PDF document to get started. I'll analyze it and answer your questions based on its content.</p>
+                            <h4 class="text-gray-800 font-medium mb-2">Start a conversation</h4>
+                            <p class="text-gray-500 text-sm">
+                                Upload a document and begin asking questions about its content
+                            </p>
                         </div>
                     </div>
                 </div>
 
-                <!-- Chat Input -->
-                <div class="border-t border-gray-200 p-3 bg-white relative">
-                    <form id="chatbot-form" class="flex space-x-2 min-h-[46px]">
+                <!-- Chat Input - Fixed position to ensure visibility -->
+                <div class="border-t border-gray-100 py-4 px-4 bg-white/80 backdrop-blur-sm input-container">
+                    <form id="chatbot-form" class="flex space-x-2">
                         <input 
                             type="text" 
                             id="messageText"
                             name="messageText"
-                            placeholder="Ask about your document..." 
-                            class="flex-grow border border-gray-300 rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-300 transition"
+                            placeholder="Ask a question about your document..." 
+                            class="flex-grow border border-gray-200 rounded-xl py-3 px-4 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition shadow-sm text-gray-700"
                             required
-                            disabled
-                            aria-label="Message input"
                         />
                         <button 
                             type="submit" 
-                            class="px-3 py-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap btn-primary text-sm"
-                            disabled
-                            id="send-button"
+                            class="bg-gradient-to-r from-indigo-500 to-violet-500 text-white p-3 rounded-xl hover:from-indigo-600 hover:to-violet-600 transition shadow-lg shadow-indigo-200/50 flex items-center justify-center send-button"
+                            aria-label="Send message"
                         >
-                            <i class="fas fa-paper-plane md:mr-1"></i>
-                            <span class="hidden md:inline">Send</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
+                            </svg>
                         </button>
                     </form>
-                    <p id="input-status" class="text-xs text-gray-500 mt-1 text-center">Upload a document to start chatting</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.0.2/marked.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
     $(function() {
-        const messageInput = $('#messageText');
-        const sendButton = $('#send-button');
-        const chatContainer = $('#chat-container');
-        const uploadForm = $('#pdf-upload-form');
-        const fileInput = $('#pdf-file');
-        const uploadButton = $('#upload-button');
-        const welcomeMessage = $('#welcome-message');
-        
-        // Initialize
-        updateUploadButtonState();
-        
-        // Enable drag and drop for file upload
-        const dropZone = $('#pdf-upload-form .border-dashed');
-        
-        dropZone.on('dragover', function(e) {
-            e.preventDefault();
-            $(this).addClass('border-indigo-500 bg-indigo-100');
+        // Configure marked options
+        marked.setOptions({
+            breaks: true,             // Convert line breaks to <br>
+            gfm: true,                // Enable GitHub flavored markdown
+            headerIds: false,         // Disable adding IDs to headers
+            mangle: false,            // Disable escaping of header content
+            sanitize: false,          // This is deprecated but set to maintain legacy behavior
         });
         
-        dropZone.on('dragleave', function(e) {
-            e.preventDefault();
-            $(this).removeClass('border-indigo-500 bg-indigo-100');
-        });
-        
-        dropZone.on('drop', function(e) {
-            e.preventDefault();
-            $(this).removeClass('border-indigo-500 bg-indigo-100');
-            
-            const files = e.originalEvent.dataTransfer.files;
-            if (files.length > 0 && files[0].type === 'application/pdf') {
-                fileInput[0].files = files;
-                handleFileSelection(files[0]);
-            } else {
-                $('#upload-status').html('<p class="text-red-500">Please upload a PDF file</p>');
-            }
-        });
-
         // File input enhancement
-        fileInput.on('change', function(e) {
-            if (e.target.files.length > 0) {
-                handleFileSelection(e.target.files[0]);
-            }
+        $('#pdf-file').on('change', function(e) {
+            var fileName = e.target.files[0].name;
+            $('#file-name').text(fileName);
         });
-        
-        function handleFileSelection(file) {
-            const fileName = file.name;
-            const fileSize = file.size;
-            const fileSizeMB = (fileSize / (1024 * 1024)).toFixed(2);
-            
-            if (fileSize > 10 * 1024 * 1024) { // 10MB limit
-                $('#file-name').html(`<span class="text-red-500">${fileName.length > 15 ? fileName.substr(0, 12) + '...' : fileName} (${fileSizeMB}MB)</span>`);
-                $('#upload-status').html('<p class="text-red-500">File too large (max 10MB)</p>');
-                uploadButton.prop('disabled', true);
-            } else {
-                $('#file-name').text(fileName.length > 15 ? fileName.substr(0, 12) + '...' : fileName);
-                $('#upload-status').html('');
-                uploadButton.prop('disabled', false);
-            }
-            
-            updateUploadButtonState();
-        }
-        
-        function updateUploadButtonState() {
-            if (fileInput[0].files.length === 0) {
-                uploadButton.prop('disabled', true);
-            } else {
-                uploadButton.prop('disabled', false);
-            }
-        }
 
         // PDF Upload Handler
-        uploadForm.submit(function(e) {
+        $('#pdf-upload-form').submit(function(e) {
             e.preventDefault();
-            
-            if (fileInput[0].files.length === 0) {
-                $('#upload-status').html('<p class="text-amber-600">Please select a PDF file first</p>');
-                return;
-            }
+            var formData = new FormData(this);
 
             // Show loading spinner
             $('#upload-button-text').addClass('invisible');
             $('#upload-spinner').removeClass('hidden');
-            $('#upload-button').prop('disabled', true);
-            $('#upload-status').html('<p class="text-indigo-600"><i class="fas fa-spinner fa-spin mr-1"></i> Processing...</p>');
+            $('#upload-status').html('<p class="text-indigo-600">Processing document...</p>');
 
-            var formData = new FormData(this);
             $.ajax({
                 type: "POST",
                 url: "/upload_pdf",
@@ -452,29 +418,28 @@
                     // Hide loading spinner
                     $('#upload-button-text').removeClass('invisible');
                     $('#upload-spinner').addClass('hidden');
-                    $('#upload-button').prop('disabled', false);
 
-                    $('#upload-status').html('<p class="text-green-600"><i class="fas fa-check-circle mr-1"></i> Processed</p>');
+                    $('#upload-status').html('<p class="text-green-600 flex items-center"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg> PDF uploaded successfully!</p>');
                     
-                    // Enable chat interface
-                    messageInput.prop('disabled', false);
-                    sendButton.prop('disabled', false);
-                    $('#input-status').text('Ask questions about the document');
+                    // Clear the chat container
+                    $('#chat-container').empty();
                     
-                    // Remove welcome message
-                    welcomeMessage.remove();
-                    
-                    // Add system message
-                    addSystemMessage('success', 'Document Processed', 'Your document has been analyzed and is ready for questions. Try asking something specific about its content.');
+                    // Add welcome message
+                    $('#chat-container').append(`
+                        <div class="flex mb-6">
+                            <div class="bg-gradient-to-r from-indigo-100 to-violet-100 text-indigo-800 p-4 chat-bubble-ai max-w-[80%] shadow-sm markdown-content">
+                                <p><span class="font-semibold">Document loaded.</span> You can now ask questions about its content.</p>
+                            </div>
+                        </div>
+                    `);
+                    scrollToBottom();
                 },
                 error: function(error) {
                     // Hide loading spinner
                     $('#upload-button-text').removeClass('invisible');
                     $('#upload-spinner').addClass('hidden');
-                    $('#upload-button').prop('disabled', false);
 
-                    $('#upload-status').html(`<p class="text-red-500"><i class="fas fa-exclamation-circle mr-1"></i> Error</p>`);
-                    addSystemMessage('error', 'Processing Failed', error.responseText || 'Could not process document.');
+                    $('#upload-status').html(`<p class="text-red-600 flex items-center"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg> Error: ${error.responseText}</p>`);
                 }
             });
         });
@@ -482,29 +447,30 @@
         // Chatbot Functionality
         $('#chatbot-form').submit(function(e) {
             e.preventDefault();
-            var message = messageInput.val().trim();
-            
-            if (!message) return;
-            
-            // Disable input while processing
-            messageInput.prop('disabled', true);
-            sendButton.prop('disabled', true);
-            
+            var message = $('#messageText').val();
+
+            // Don't process empty messages
+            if (!message.trim()) return;
+
             // Append user message
-            addUserMessage(message);
-            
-            // Clear input field
-            messageInput.val('');
-            
-            // Add typing indicator
-            const typingIndicatorId = 'typing-indicator-' + Date.now();
-            chatContainer.append(`
-                <div id="${typingIndicatorId}" class="flex mb-3 message-appear">
-                    <div class="bg-white p-2 rounded-lg shadow-sm max-w-[85%] flex items-center">
-                        <div class="typing-indicator px-2 py-1">
-                            <span></span>
-                            <span></span>
-                            <span></span>
+            $('#chat-container').append(`
+                <div class="flex justify-end mb-4">
+                    <div class="bg-gradient-to-r from-indigo-500 to-violet-600 text-white p-3 chat-bubble-user max-w-[80%] shadow-md">
+                        ${message}
+                    </div>
+                </div>
+            `);
+            scrollToBottom();
+
+            // Add loading indicator for AI response
+            var loadingId = 'loading-' + Date.now();
+            $('#chat-container').append(`
+                <div class="flex mb-4" id="${loadingId}">
+                    <div class="bg-gray-100 p-3 chat-bubble-ai max-w-[80%] shadow-sm flex items-center">
+                        <div class="flex space-x-1">
+                            <div class="w-2 h-2 bg-indigo-400 rounded-full dot-pulse"></div>
+                            <div class="w-2 h-2 bg-violet-400 rounded-full dot-pulse-delay-1"></div>
+                            <div class="w-2 h-2 bg-indigo-400 rounded-full dot-pulse-delay-2"></div>
                         </div>
                     </div>
                 </div>
@@ -516,136 +482,44 @@
                 url: "/ask",
                 data: $(this).serialize(),
                 success: function(response) {
-                    // Remove typing indicator
-                    $(`#${typingIndicatorId}`).remove();
-                    
-                    // Process markdown in response
-                    const markedResponse = marked.parse(response.answer);
-                    
-                    // Append bot response
-                    addBotMessage(markedResponse);
-                    
-                    // Re-enable input
-                    messageInput.prop('disabled', false);
-                    sendButton.prop('disabled', false);
-                    messageInput.focus();
+                    $('#messageText').val('');
+                    var answer = response.answer;
+
+                    // Remove loading indicator
+                    $(`#${loadingId}`).remove();
+
+                    // Append bot response with markdown parsing
+                    $('#chat-container').append(`
+                        <div class="flex mb-4">
+                            <div class="bg-white/90 border border-gray-200 text-gray-800 p-3 chat-bubble-ai max-w-[80%] shadow-sm markdown-content">
+                                ${marked.parse(answer)}
+                            </div>
+                        </div>
+                    `);
+                    scrollToBottom();
                 },
                 error: function(error) {
-                    // Remove typing indicator
-                    $(`#${typingIndicatorId}`).remove();
+                    // Remove loading indicator
+                    $(`#${loadingId}`).remove();
                     
                     // Show error message
-                    addSystemMessage('error', 'Error', error.responseText || 'Failed to get response');
-                    
-                    // Re-enable input
-                    messageInput.prop('disabled', false);
-                    sendButton.prop('disabled', false);
+                    $('#chat-container').append(`
+                        <div class="flex mb-4">
+                            <div class="bg-red-50 text-red-600 p-3 chat-bubble-ai max-w-[80%] shadow-sm markdown-content">
+                                Sorry, an error occurred. Please try again.
+                            </div>
+                        </div>
+                    `);
+                    scrollToBottom();
+                    console.log(error);
                 }
             });
         });
-        
-        // Add user message
-        function addUserMessage(message) {
-            chatContainer.append(`
-                <div class="flex justify-end mb-3 message-appear">
-                    <div class="bg-indigo-600 text-white p-2 rounded-lg max-w-[85%] shadow-sm text-sm">
-                        ${escapeHTML(message)}
-                    </div>
-                </div>
-            `);
-            scrollToBottom();
-        }
-        
-        // Add bot message
-        function addBotMessage(message) {
-            chatContainer.append(`
-                <div class="flex mb-3 message-appear">
-                    <div class="bg-white text-gray-800 p-3 rounded-lg max-w-[85%] shadow-sm markdown text-sm">
-                        ${message}
-                    </div>
-                </div>
-            `);
-            scrollToBottom();
-        }
-        
-        // Add system message
-        function addSystemMessage(type, title, message) {
-            let icon, bgColor, borderColor;
-            
-            switch(type) {
-                case 'success':
-                    icon = 'check-circle';
-                    bgColor = 'bg-green-50';
-                    borderColor = 'border-green-100';
-                    break;
-                case 'error':
-                    icon = 'exclamation-circle';
-                    bgColor = 'bg-red-50';
-                    borderColor = 'border-red-100';
-                    break;
-                case 'info':
-                default:
-                    icon = 'info-circle';
-                    bgColor = 'bg-indigo-50';
-                    borderColor = 'border-indigo-100';
-            }
-            
-            chatContainer.append(`
-                <div class="flex justify-center mb-3 message-appear">
-                    <div class="${bgColor} text-gray-700 px-4 py-3 rounded-lg max-w-md text-center shadow-sm border ${borderColor}">
-                        <i class="fas fa-${icon} text-${type === 'error' ? 'red' : type === 'success' ? 'green' : 'indigo'}-500 mb-1"></i>
-                        <h3 class="font-medium text-sm">${title}</h3>
-                        <p class="text-xs text-gray-600">${message}</p>
-                    </div>
-                </div>
-            `);
-            scrollToBottom();
-        }
-        
-        // Clear chat
-        $('#clear-chat').click(function() {
-            chatContainer.html(`
-                <div class="flex justify-center message-appear">
-                    <div class="bg-white text-gray-700 px-4 py-3 rounded-lg max-w-md text-center shadow-sm border border-indigo-100">
-                        <div class="bg-indigo-600 w-10 h-10 rounded-full flex items-center justify-center mx-auto mb-2">
-                            <i class="fas fa-robot text-white"></i>
-                        </div>
-                        <h3 class="font-medium text-sm mb-2">Chat cleared!</h3>
-                        <p class="text-xs text-gray-600">You can continue asking questions about the uploaded document.</p>
-                    </div>
-                </div>
-            `);
-        });
-        
-        // Refresh chat
-        $('#refresh-chat').click(function() {
-            location.reload();
-        });
-        
-        // Escape HTML content
-        function escapeHTML(text) {
-            return text
-                .replace(/&/g, "&amp;")
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")
-                .replace(/"/g, "&quot;")
-                .replace(/'/g, "&#039;");
-        }
 
-        // Auto-scroll to bottom
         function scrollToBottom() {
-            chatContainer.scrollTop(chatContainer[0].scrollHeight);
+            var container = $('#chat-container');
+            container.scrollTop(container[0].scrollHeight);
         }
-        
-        // Handle Enter key in input
-        messageInput.on('keydown', function(e) {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                if (!sendButton.prop('disabled')) {
-                    $('#chatbot-form').submit();
-                }
-            }
-        });
     });
     </script>
 </body>

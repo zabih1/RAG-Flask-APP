@@ -2,6 +2,8 @@
 
 A Flask-based application implementing Retrieval-Augmented Generation (RAG).
 
+
+
 ## Directory Structure
 
 ```

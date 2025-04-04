@@ -33,6 +33,8 @@ def setup_vector_database(pdf_path):
     """Processes a PDF, extracts text, generates embeddings, and stores them in Weaviate."""
     loader = PyPDFLoader(pdf_path)
     documents = loader.load()
+    
+
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
     docs = text_splitter.split_documents(documents)
 
@@ -81,7 +83,5 @@ def create_rag_chain(vector_db):
     return rag_chain
 
 
-# db = setup_vector_database(r"D:\JMM Internship\M7 - Generative ai\Task 2\Flask RAG App\DATA\Invoice_6.pdf")
-# chain = create_rag_chain(db)
-# print(chain.invoke("tell me about the invoice amount"))
-
+db = setup_vector_database(r"D:\JMM Internship\M7 - Generative ai\Task 2\Flask RAG App\DATA\Invoice_6.pdf")
+print(db)
