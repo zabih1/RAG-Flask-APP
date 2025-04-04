@@ -3,142 +3,103 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DocuChat AI</title>
+    <title>Document AI Assistant</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(120deg, #f0f9ff, #e0f2fe);
         }
-        
-        .user-message {
-            background: linear-gradient(135deg, #3b82f6, #2563eb);
+        .scrollbar-thin::-webkit-scrollbar {
+            width: 6px;
         }
-        
-        .typing-dot {
-            animation: typing 1.4s infinite ease-in-out both;
+        .scrollbar-thin::-webkit-scrollbar-track {
+            background: #f1f1f1;
         }
-        
-        .typing-dot:nth-child(1) { animation-delay: 0s; }
-        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
-        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
-        
-        @keyframes typing {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.5); }
+        .scrollbar-thin::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 3px;
         }
-        
-        .toast {
-            transform: translateX(120%);
-            transition: transform 0.3s ease;
-        }
-        
-        .toast.show {
-            transform: translateX(0);
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
-
-<body class="min-h-screen flex items-center justify-center p-4">
-    <!-- Toast Notification -->
-    <div id="toast" class="toast fixed top-5 right-5 z-50 bg-white p-3 rounded-lg shadow-lg border-l-4 border-blue-500 flex items-center max-w-xs">
-        <div id="toast-icon" class="text-blue-500 mr-2">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                <polyline points="22 4 12 14.01 9 11.01"></polyline>
-            </svg>
-        </div>
-        <div class="flex-1">
-            <p id="toast-message" class="text-sm text-gray-700">Document uploaded successfully</p>
-        </div>
-        <button onclick="hideToast()" class="text-gray-400 hover:text-gray-600 ml-2">✕</button>
-    </div>
-
-    <div class="w-full max-w-5xl bg-white rounded-xl shadow-lg overflow-hidden">
-        <div class="md:flex h-[600px]">
-            <!-- Upload Section -->
-            <div class="md:w-1/3 bg-gradient-to-b from-blue-50 to-white p-6 border-r border-gray-100">
-                <div class="text-center mb-6">
-                    <h1 class="text-xl font-semibold text-gray-800">DocuChat AI</h1>
-                    <p class="text-gray-500 text-sm mt-1">Ask questions about your documents</p>
-                </div>
-
-                <form id="pdf-upload-form" class="space-y-4">
-                    <div id="upload-area" class="border-2 border-dashed border-blue-200 rounded-xl p-6 text-center hover:border-blue-400 transition-colors cursor-pointer bg-blue-50">
-                        <input type="file" id="pdf-file" name="pdf-file" accept=".pdf" class="hidden" />
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-3 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                        <p class="text-gray-700 font-medium mb-2">Upload PDF Document</p>
-                        <p class="text-gray-500 text-sm">Drag & drop or click to browse</p>
-                        <div id="file-name-container" class="hidden mt-3 p-2 bg-white rounded border border-blue-100 text-sm text-gray-700 truncate"></div>
-                    </div>
-                    <button type="submit" id="upload-button" class="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition font-medium shadow-md relative flex items-center justify-center">
-                        <span id="upload-button-text">Upload Document</span>
-                        <svg id="upload-spinner" class="hidden animate-spin ml-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                    </button>
-                </form>
-                
-                <div id="upload-status" class="mt-3 text-center text-sm"></div>
-                
-                <div class="mt-8 text-center">
-                    <div id="status-indicator" class="inline-flex items-center px-3 py-1 rounded-full bg-gray-100">
-                        <span class="h-2 w-2 rounded-full bg-gray-300 mr-2"></span>
-                        <span id="assistant-status" class="text-xs text-gray-500">Waiting for document</span>
-                    </div>
+<body class="bg-gray-50 min-h-screen flex items-center justify-center p-4">
+    <div class="w-full max-w-4xl bg-white shadow-xl rounded-2xl overflow-hidden border border-gray-100">
+        <div class="md:flex">
+            <div class="md:w-1/3 bg-gray-50 p-6 border-r border-gray-100">
+                <div class="text-center">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6">Upload Document</h2>
+                    <form id="pdf-upload-form" class="space-y-4">
+                        <div class="border-2 border-dashed border-blue-200 p-6 rounded-xl transition hover:border-blue-400 group">
+                            <input 
+                                type="file" 
+                                id="pdf-file" 
+                                name="pdf-file" 
+                                accept=".pdf" 
+                                class="hidden"
+                            />
+                            <label 
+                                for="pdf-file" 
+                                class="cursor-pointer block"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto mb-4 text-blue-400 group-hover:text-blue-600 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                                <p class="text-gray-600 group-hover:text-blue-600 transition">
+                                    Click to upload PDF
+                                </p>
+                            </label>
+                            <p id="file-name" class="text-xs text-gray-500 mt-2 truncate"></p>
+                        </div>
+                        <button 
+                            type="submit" 
+                            id="upload-button"
+                            class="w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 transition font-semibold shadow-md shadow-blue-200 relative"
+                        >
+                            <span id="upload-button-text">Upload Document</span>
+                            <div id="upload-spinner" class="hidden absolute inset-0 flex items-center justify-center">
+                                <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                            </div>
+                        </button>
+                    </form>
+                    <div id="upload-status" class="mt-4 text-sm h-6"></div>
                 </div>
             </div>
 
             <!-- Chat Section -->
-            <div class="md:w-2/3 flex flex-col bg-gray-50">
-                <!-- Chat Messages -->
-                <div id="chat-container" class="flex-grow p-4 overflow-y-auto">
-                    <div id="welcome-message" class="flex justify-center items-center h-full">
-                        <div class="text-center p-5 rounded-lg bg-blue-50 max-w-md">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mx-auto mb-3 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-                            </svg>
-                            <h3 class="text-lg font-medium text-gray-800 mb-2">Welcome to DocuChat</h3>
-                            <p class="text-gray-600 text-sm">Upload a PDF document to start asking questions about its content.</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Typing Indicator -->
-                <div id="typing-indicator" class="px-4 py-3 hidden">
-                    <div class="flex items-center">
-                        <div class="mr-2 h-7 w-7 rounded-full bg-blue-100 flex items-center justify-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
-                                <line x1="8" y1="21" x2="16" y2="21"></line>
-                                <line x1="12" y1="17" x2="12" y2="21"></line>
-                            </svg>
-                        </div>
-                        <div class="flex space-x-1">
-                            <div class="typing-dot h-2 w-2 rounded-full bg-blue-500"></div>
-                            <div class="typing-dot h-2 w-2 rounded-full bg-blue-500"></div>
-                            <div class="typing-dot h-2 w-2 rounded-full bg-blue-500"></div>
-                        </div>
+            <div class="md:w-2/3 flex flex-col">
+                <!-- Chat Messages Container -->
+                <div 
+                    id="chat-container" 
+                    class="flex-grow p-6 overflow-y-auto h-[500px] scrollbar-thin"
+                >
+                    <div class="text-center text-gray-400 italic">
+                        Upload a document and start chatting
                     </div>
                 </div>
 
                 <!-- Chat Input -->
-                <div class="border-t border-gray-200 p-4 bg-white">
+                <div class="border-t border-gray-100 p-4 bg-white">
                     <form id="chatbot-form" class="flex space-x-2">
-                        <input type="text" id="messageText" name="messageText" placeholder="Ask about your document..." 
-                            class="flex-grow border border-gray-200 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:bg-gray-100" 
-                            required disabled />
-                        <button type="submit" id="send-button" 
-                            class="bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 transition shadow-md disabled:opacity-50" 
-                            disabled>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <line x1="22" y1="2" x2="11" y2="13"></line>
-                                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-                            </svg>
+                        <input 
+                            type="text" 
+                            id="messageText"
+                            name = "messageText"
+                            placeholder="Ask a question about your document" 
+                            class="flex-grow border border-gray-200 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-300 transition"
+                            required
+                        />
+                        <button 
+                            type="submit" 
+                            class="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition shadow-md shadow-blue-200"
+                        >
+                            Send
                         </button>
                     </form>
                 </div>
@@ -148,168 +109,96 @@
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-        $(function() {
-            // File handling
-            $('#pdf-file').on('change', function(e) {
-                if (e.target.files.length > 0) {
-                    $('#file-name-container').removeClass('hidden').text(e.target.files[0].name);
-                }
-            });
-
-            // Drag & drop functionality
-            const uploadArea = document.getElementById('upload-area');
-            
-            ['dragenter', 'dragover', 'drop'].forEach(event => {
-                uploadArea.addEventListener(event, (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                });
-            });
-            
-            ['dragenter', 'dragover'].forEach(event => {
-                uploadArea.addEventListener(event, () => {
-                    uploadArea.classList.add('bg-blue-100');
-                });
-            });
-            
-            ['dragleave', 'drop'].forEach(event => {
-                uploadArea.addEventListener(event, () => {
-                    uploadArea.classList.remove('bg-blue-100');
-                });
-            });
-            
-            uploadArea.addEventListener('drop', (e) => {
-                const files = e.dataTransfer.files;
-                if (files.length > 0 && files[0].type === 'application/pdf') {
-                    document.getElementById('pdf-file').files = files;
-                    $('#file-name-container').removeClass('hidden').text(files[0].name);
-                } else {
-                    showToast('Please upload a PDF file');
-                }
-            });
-            
-            uploadArea.addEventListener('click', () => {
-                document.getElementById('pdf-file').click();
-            });
-
-            // PDF Upload
-            $('#pdf-upload-form').submit(function(e) {
-                e.preventDefault();
-                
-                $('#upload-button-text').addClass('mr-2');
-                $('#upload-spinner').removeClass('hidden');
-                $('#upload-status').html('<p class="text-blue-600">Processing document...</p>');
-
-                $.ajax({
-                    type: "POST",
-                    url: "/upload_pdf",
-                    data: new FormData(this),
-                    processData: false,
-                    contentType: false,
-                    success: function(response) {
-                        $('#upload-button-text').removeClass('mr-2');
-                        $('#upload-spinner').addClass('hidden');
-                        
-                        // Update status
-                        $('#status-indicator').removeClass('bg-gray-100').addClass('bg-green-100');
-                        $('#status-indicator span:first-child').removeClass('bg-gray-300').addClass('bg-green-500');
-                        $('#assistant-status').text('Ready to answer questions');
-                        
-                        // Enable chat
-                        $('#messageText, #send-button').prop('disabled', false);
-                        
-                        showToast('Document uploaded successfully');
-                        
-                        // Add initial message
-                        $('#welcome-message').remove();
-                        addBotMessage("I've analyzed your document. What would you like to know about it?");
-                    },
-                    error: function(error) {
-                        $('#upload-button-text').removeClass('mr-2');
-                        $('#upload-spinner').addClass('hidden');
-                        $('#upload-status').html(`<p class="text-red-600">Error: ${error.responseText}</p>`);
-                        showToast('Failed to upload document');
-                    }
-                });
-            });
-
-            // Chat functionality
-            $('#chatbot-form').submit(function(e) {
-                e.preventDefault();
-                var message = $('#messageText').val().trim();
-                
-                if (!message) return;
-                
-                addUserMessage(message);
-                $('#messageText').val('');
-                $('#typing-indicator').removeClass('hidden');
-                
-                $.ajax({
-                    type: "POST",
-                    url: "/ask",
-                    data: $(this).serialize(),
-                    success: function(response) {
-                        $('#typing-indicator').addClass('hidden');
-                        setTimeout(() => addBotMessage(response.answer), 300);
-                    },
-                    error: function(error) {
-                        $('#typing-indicator').addClass('hidden');
-                        addBotMessage("I'm sorry, I encountered an error. Please try again.");
-                    }
-                });
-            });
-            
-            // Helper functions
-            function addUserMessage(message) {
-                $('#chat-container').append(`
-                    <div class="flex justify-end mb-3">
-                        <div class="user-message text-white p-3 rounded-lg max-w-[80%] shadow-sm">
-                            ${escapeHtml(message)}
-                        </div>
-                    </div>
-                `);
-                scrollToBottom();
-            }
-            
-            function addBotMessage(message) {
-                $('#chat-container').append(`
-                    <div class="flex mb-3">
-                        <div class="bg-white p-3 rounded-lg max-w-[80%] shadow-sm border border-gray-100">
-                            ${formatMessage(message)}
-                        </div>
-                    </div>
-                `);
-                scrollToBottom();
-            }
-            
-            function scrollToBottom() {
-                const container = document.getElementById('chat-container');
-                container.scrollTop = container.scrollHeight;
-            }
-            
-            function showToast(message) {
-                $('#toast-message').text(message);
-                $('#toast').addClass('show');
-                setTimeout(hideToast, 3000);
-            }
-            
-            window.hideToast = function() {
-                $('#toast').removeClass('show');
-            }
-            
-            function formatMessage(message) {
-                return message.replace(/\n/g, '<br>');
-            }
-            
-            function escapeHtml(text) {
-                return text
-                    .replace(/&/g, "&amp;")
-                    .replace(/</g, "&lt;")
-                    .replace(/>/g, "&gt;")
-                    .replace(/"/g, "&quot;")
-                    .replace(/'/g, "&#039;");
-            }
+    $(function() {
+        // File input enhancement
+        $('#pdf-file').on('change', function(e) {
+            var fileName = e.target.files[0].name;
+            $('#file-name').text(fileName);
         });
+
+        // PDF Upload Handler
+        $('#pdf-upload-form').submit(function(e) {
+            e.preventDefault();
+            var formData = new FormData(this);
+
+            // Show loading spinner
+            $('#upload-button-text').addClass('invisible');
+            $('#upload-spinner').removeClass('hidden');
+            $('#upload-status').html('<p class="text-blue-600">Processing document...</p>');
+
+            $.ajax({
+                type: "POST",
+                url: "/upload_pdf",
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    // Hide loading spinner
+                    $('#upload-button-text').removeClass('invisible');
+                    $('#upload-spinner').addClass('hidden');
+
+                    $('#upload-status').html('<p class="text-green-600">PDF uploaded successfully!</p>');
+                    $('#chat-container').append(`
+                        <div class="bg-blue-50 p-4 rounded-lg mb-4 text-gray-700 border border-blue-100">
+                            PDF uploaded. You can now ask questions about its content.
+                        </div>
+                    `);
+                    scrollToBottom();
+                },
+                error: function(error) {
+                    // Hide loading spinner
+                    $('#upload-button-text').removeClass('invisible');
+                    $('#upload-spinner').addClass('hidden');
+
+                    $('#upload-status').html(`<p class="text-red-600">Error: ${error.responseText}</p>`);
+                }
+            });
+        });
+
+        // Chatbot Functionality
+        $('#chatbot-form').submit(function(e) {
+            e.preventDefault();
+            var message = $('#messageText').val();
+
+            // Append user message
+            $('#chat-container').append(`
+                <div class="flex justify-end mb-4">
+                    <div class="bg-blue-500 text-white p-3 rounded-lg max-w-[80%] shadow-md">
+                        ${message}
+                    </div>
+                </div>
+            `);
+            scrollToBottom();
+
+            $.ajax({
+                type: "POST",
+                url: "/ask",
+                data: $(this).serialize(),
+                success: function(response) {
+                    $('#messageText').val('');
+                    var answer = response.answer;
+
+                    // Append bot response
+                    $('#chat-container').append(`
+                        <div class="flex mb-4">
+                            <div class="bg-gray-100 text-gray-800 p-3 rounded-lg max-w-[80%] shadow-sm">
+                                ${answer}
+                            </div>
+                        </div>
+                    `);
+                    scrollToBottom();
+                },
+                error: function(error) {
+                    console.log(error);
+                }
+            });
+        });
+
+        function scrollToBottom() {
+            var container = $('#chat-container');
+            container.scrollTop(container[0].scrollHeight);
+        }
+    });
     </script>
 </body>
 </html>
