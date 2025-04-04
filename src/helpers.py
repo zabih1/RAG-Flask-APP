@@ -61,14 +61,27 @@ def create_rag_chain(vector_db):
     """Creates a RAG (Retrieval-Augmented Generation) chain using Weaviate as the retriever."""
 
     
-    template = """You are an assistant for question-answering tasks. 
-    Use the following pieces of retrieved context to answer the question. 
-    If you don't know the answer, just say that you don't know. 
+    template = """
     
-    Question: {question} 
-    Context: {context} 
+    You are a helpful document assistant with a friendly, conversational tone. 
+    Your goal is to answer questions about the provided document in a natural, 
+    helpful way.
+
+    When responding:
+    - Use the context from the document to provide accurate information
+    - Explain concepts in simple, clear language
+    - If the answer is in the document, provide it with relevant details
+    - If the answer isn't in the document, politely let the user know and suggest 
+    what information might help you answer their question
+    - Keep responses concise but informative
+    - Maintain a warm, helpful tone throughout
+
+    Question: {question}
+    Document Context: {context}
+
+    Response:
     
-    Answer:"""
+    """
     
     prompt = ChatPromptTemplate.from_template(template)
     retriever = vector_db.as_retriever(search_kwargs={"k": 5})
